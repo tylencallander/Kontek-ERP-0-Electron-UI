@@ -4,57 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Run Script</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            color: #333;
-        }
-        #debug-section {
-            margin-top: 20px;
-        }
-        #debug-log {
-            border: 1px solid #ccc;
-            padding: 10px;
-            background-color: #f9f9f9;
-            overflow-y: auto;
-            height: 300px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            color: #333;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px 0;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #selected-folder {
-            font-size: 14px;
-            color: #555;
-            margin: 5px 0;
-        }
-    </style>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <h1 id="script-title"></h1>
-    <div>
-        <button id="choose-folder">Choose Output Folder</button>
-        <div id="selected-folder">No folder selected.</div>
-    </div>
-    <div id="debug-section">
-        <h3>Debugging Logs</h3>
-        <pre id="debug-log"></pre>
-    </div>
-    <button id="run-script">Run Script</button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container d-flex align-items-center">
+            <a href="index.html" class="d-flex align-items-center text-decoration-none">
+                <img src="css/logo.png" alt="Kontek Logo" class="logo me-3">
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="row">
+                <!-- Left Panel: Buttons and Folder Selection -->
+                <div class="col-md-4">
+                    <h2 id="script-title" class="mb-3">Script Name</h2>
+                    <button id="choose-folder" class="btn btn-primary mb-2 w-100">Choose Output Folder</button>
+                    <p id="selected-folder" class="text-muted">No folder selected.</p>
+                    <button id="run-script" class="btn btn-success w-100">Run Script</button>
+                </div>
+
+                <!-- Right Panel: Debugging Logs -->
+                <div class="col-md-8">
+                    <div class="debug-section">
+                        <h2>Debugging Logs</h2>
+                        <div id="debug-log" class="debug-log"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -63,7 +55,7 @@
 
         let selectedFolder = null;
 
-        document.getElementById("script-title").innerText = `Run: ${scriptTitle}`;
+        document.getElementById("script-title").innerText = `Currently Running: ${scriptTitle}`;
 
         document.getElementById("choose-folder").addEventListener("click", async () => {
             const folderPath = await window.electronAPI.chooseFolder();
