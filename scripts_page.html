@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Script</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        #debug-section {
+            margin-top: 20px;
+        }
+        #debug-log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            overflow-y: auto;
+            height: 300px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px 0;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #selected-folder {
+            font-size: 14px;
+            color: #555;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="script-title"></h1>
+    <div>
+        <button id="choose-folder">Choose Output Folder</button>
+        <div id="selected-folder">No folder selected.</div>
+    </div>
+    <div id="debug-section">
+        <h3>Debugging Logs</h3>
+        <pre id="debug-log"></pre>
+    </div>
+    <button id="run-script">Run Script</button>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const scriptName = urlParams.get("file");
+        const scriptTitle = urlParams.get("name");
+
+        let selectedFolder = null;
+
+        document.getElementById("script-title").innerText = `Run: ${scriptTitle}`;
+
+        document.getElementById("choose-folder").addEventListener("click", async () => {
+            const folderPath = await window.electronAPI.chooseFolder();
+            if (folderPath) {
+                selectedFolder = folderPath;
+                document.getElementById("selected-folder").innerText = `Selected folder: ${selectedFolder}`;
+            } else {
+                document.getElementById("selected-folder").innerText = `No folder selected.`;
+            }
+        });
+
+        document.getElementById("run-script").addEventListener("click", async () => {
+            const debugLog = document.getElementById("debug-log");
+            debugLog.innerText = "Starting script execution...\n";
+
+            if (!selectedFolder) {
+                debugLog.innerText += "Error: No output folder selected.\n";
+                return;
+            }
+
+            try {
+                await window.electronAPI.runScript(scriptName, selectedFolder);
+                debugLog.innerText += "Script execution completed successfully.\n";
+            } catch (error) {
+                debugLog.innerText += `Error: ${error.message}\n`;
+            }
+        });
+
+        window.electronAPI.onLog((event, message) => {
+            const debugLog = document.getElementById("debug-log");
+            debugLog.innerText += message + "\n";
+            debugLog.scrollTop = debugLog.scrollHeight;
+        });
+    </script>
+</body>
+</html>
