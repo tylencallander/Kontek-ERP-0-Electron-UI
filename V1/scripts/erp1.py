@@ -2,8 +2,6 @@ import os
 import json
 import openpyxl
 
-# Added another key for Project Numbers not found in spreadsheet
-
 basepath = 'P:/KONTEK/CUSTOMER'
 projects = {}
 errors = {
@@ -11,9 +9,8 @@ errors = {
     "PROJECTNUMBERFOLDERNOTFOUND": []
 }
 
-# Extracts project numbers, including those with suffixes from the Excel file.
-
 def extract_project_numbers_from_excel(excel_file_path):
+    print("Parsing project numbers from Excel file...")
     try:
         wb = openpyxl.load_workbook(excel_file_path, data_only=True)
         ws = wb.active
@@ -23,17 +20,17 @@ def extract_project_numbers_from_excel(excel_file_path):
             if cell_value.startswith('K') and len(cell_value) == 8 and cell_value[1:8].isdigit():
                 project_numbers.add(cell_value)
                 print(f"Extracted project number: {cell_value} from Excel sheet")
+        print(f"Completed parsing Excel file. Total project numbers found: {len(project_numbers)}")
         return project_numbers
     except Exception as e:
         print(f"Error reading from Excel: {e}")
         return set()
-    
-# Checks through the network folders to find project folders and logs them if they match the project numbers found in the Excel file.
 
 def check_project_folder(base_path, excel_project_numbers):
+    print("Checking project folders in the base directory...")
     network_projects = set()
     try:
-        for root, dirs, files in os.walk(base_path, topdown=True):
+        for root, dirs, _ in os.walk(base_path, topdown=True):
             for folder in dirs:
                 full_path = os.path.join(root, folder)
                 if folder.startswith('K') and len(folder) >= 8 and folder[1:8].isdigit():
@@ -46,14 +43,16 @@ def check_project_folder(base_path, excel_project_numbers):
                     network_projects.add(project_number)
                     print(f"Found and logged project: {project_number} at {full_path}")
 
+        # Add projects in the network not found in the spreadsheet to errors
         extra_projects = network_projects.difference(excel_project_numbers)
-        errors["PROJECTNUMBERNOTINSPREADSHEET"].extend(extra_projects)
+        if extra_projects:
+            errors["PROJECTNUMBERNOTINSPREADSHEET"].extend(extra_projects)
     except Exception as e:
         print(f"Error checking project folder: {e}")
-
-# Finds unmatched projects in both the Excel file and network and prints them out for the user to fix
+    return network_projects
 
 def find_unmatched_projects(excel_project_numbers, network_projects):
+    print("Finding unmatched projects...")
     missing_projects = excel_project_numbers.difference(network_projects)
     if missing_projects:
         errors["PROJECTNUMBERFOLDERNOTFOUND"].extend(missing_projects)
@@ -64,20 +63,24 @@ def main():
     print("\nParsing all Files in KONTEK's Network...\n")
     excel_file_path = "P:/KONTEK/KONTEK PROJECT JOB NUMBERS.xlsx"
     excel_project_numbers = extract_project_numbers_from_excel(excel_file_path)
-    check_project_folder(basepath, excel_project_numbers)
-    find_unmatched_projects(excel_project_numbers, set(projects.keys()))
+    network_projects = check_project_folder(basepath, excel_project_numbers)
+    find_unmatched_projects(excel_project_numbers, network_projects)
 
-# Creating projects.json and errors.json files to store parsed data
+    # Save results to JSON files
+    print("\nSaving results to JSON files...")
+    try:
+        with open("projects.json", "w") as f:
+            json.dump(projects, f, indent=4)
+        with open("errors.json", "w") as f:
+            json.dump(errors, f, indent=4)
 
-    with open("projects.json", "w") as f:
-        json.dump(projects, f, indent=4)
-    with open("errors.json", "w") as f:
-        json.dump(errors, f, indent=4)
+        print(f"Logged {len(projects)} found projects to projects.json")
+        print(f"Logged {len(errors['PROJECTNUMBERNOTINSPREADSHEET'])} projects not in spreadsheet to errors.json")
+        print(f"Logged {len(errors['PROJECTNUMBERFOLDERNOTFOUND'])} missing projects to errors.json")
+    except Exception as e:
+        print(f"Error saving JSON files: {e}")
 
     print("\nParsing Complete!\n")
-    print(f"Logged {len(projects)} found projects to projects.json")
-    print(f"Logged {len(errors['PROJECTNUMBERNOTINSPREADSHEET'])} projects not in spreadsheet to errors.json")
-    print(f"Logged {len(errors['PROJECTNUMBERFOLDERNOTFOUND'])} missing projects to errors.json")
 
 if __name__ == "__main__":
     main()

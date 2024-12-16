@@ -22,10 +22,18 @@ ipcMain.handle('choose-folder', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openDirectory']
     });
-    return result.filePaths[0]; // Return the selected folder path
+    return result.filePaths[0];
 });
 
-ipcMain.handle('run-script', (event, scriptName, folderPath) => {
+ipcMain.handle('choose-file', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openFile'],
+        filters: [{ name: 'Excel Files', extensions: ['xlsx'] }]
+    });
+    return result.canceled ? null : result.filePaths[0];
+});
+
+ipcMain.handle('run-script', (event, scriptName, folderPath, baseDirectory, filePath) => {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(__dirname, 'scripts', scriptName);
 
@@ -36,7 +44,7 @@ ipcMain.handle('run-script', (event, scriptName, folderPath) => {
             return;
         }
 
-        const pythonProcess = spawn('python', ['-u', scriptPath, folderPath]); // Pass folderPath to Python script
+        const pythonProcess = spawn('python', ['-u', scriptPath, folderPath, baseDirectory, filePath]);
 
         pythonProcess.stdout.on('data', (data) => {
             const lines = data.toString().split('\n');

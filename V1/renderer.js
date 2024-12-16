@@ -1,7 +1,9 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    runScript: (scriptName, folderPath) => ipcRenderer.invoke('run-script', scriptName, folderPath),
+    runScript: (scriptName, folderPath, baseDirectory, filePath) =>
+        ipcRenderer.invoke('run-script', scriptName, folderPath, baseDirectory, filePath),
     chooseFolder: () => ipcRenderer.invoke('choose-folder'),
-    onLog: (callback) => ipcRenderer.on('script-log', callback)
+    chooseFile: () => ipcRenderer.invoke('choose-file'),
+    onLog: (callback) => ipcRenderer.on('script-log', callback),
 });
