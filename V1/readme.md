@@ -26,8 +26,8 @@ I started with editing the ERP1 code just to see how I wanted to do it for the o
 
 To make sure the save output to location functionality actually works though I've been testing it using the test.py script I have listed along with the other erp scripts, and everything looks good.
 
-When you select a script to run, the application parses the code from that respective erp folder and uses that code. For now im keeping the scripts folder just for debugging
+This is very far from complete but I'll be home soon so I can get back to the grind and make some good progress before 2nd semester.
 
 - Tylen
 
-2024-12-14
+2024-12-13
