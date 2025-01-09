@@ -1,0 +1,1 @@
+A cross-platform ERP application with Electron, integrating the Python scripts I developed previously with a dynamic UI using JavaScript, HTML, and CSS, enabling more efficient and customizable script automation.
